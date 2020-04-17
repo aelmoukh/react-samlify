@@ -13,6 +13,8 @@
     "@authenio/samlify-node-xmllint": "^1.0.1",
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express-session": "^1.17.1",
     "jsonwebtoken": "^8.3.0",
     "query-string": "^6.2.0",
     "react": "^16.8.4",
@@ -22,6 +24,7 @@
     "react-router-dom": "^4.3.1",
     "samlify": "^2.6.0",
     "styled-components": "^4.0.2",
+    "url-join": "^4.0.1",
     "webpack": "^4.20.2"
   },
   "devDependencies": {

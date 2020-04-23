@@ -6,6 +6,7 @@ import { Constants } from "samlify";
 const cors = require('cors');
 const url = require('url'); 
 const session = require('express-session');
+const home_url = 'http://localhost:4736/welcome';
 export default function server(app) {
   app.use(bodyParser.urlencoded({ extended: false }));
   // for pretty print debugging
@@ -28,7 +29,6 @@ export default function server(app) {
       if (payload) {
         // create session and redirect to the session page
         const token = createToken(payload);
-        // res.cookie("SESSIONID", token, { httpOnly: true, secure: true });
         return res.redirect(url.format({pathname:req.session.redirectUrl,query: {"auth_token" :token}}));
       }
       throw new Error("ERR_USER_NOT_FOUND");
@@ -46,6 +46,7 @@ export default function server(app) {
     
     if (req.session) {  
       req.session.redirectUrl = callerwebsite+callbackurl; 
+      req.session.callerwebsite = callerwebsite; 
     }  
     const { id, context: redirectUrl } = await req.sp.createLoginRequest(
       req.idp,
@@ -72,7 +73,16 @@ export default function server(app) {
   // endpoint where consuming logout response
   app.post("/sp/sso/logout", async (req, res) => {
     const { extract } = await req.sp.parseLogoutResponse(req.idp, "post", req);
-    return res.redirect("/logout");
+    console.log("**********logout consume******************");
+    //console.log(req);
+    //return res.redirect("/logout");
+    console.log((req.header('Referer') || req.originalUrl || req.url || '').split('/')[2]);
+    console.log(req.header('Referer'));
+    console.log(req.originalUrl);
+    console.log(req.url);
+    console.log(req.origin);
+    
+    return res.redirect(home_url);
   });
 
   app.get("/sp/single_logout/redirect", async (req, res) => {
@@ -81,6 +91,9 @@ export default function server(app) {
       "redirect",
       { logoutNameID: "user.passify.io@gmail.com" }
     );
+    console.log("**********logout******************");
+    console.log(redirectUrl);
+    
     return res.redirect(redirectUrl);
   });
 
@@ -95,7 +108,6 @@ export default function server(app) {
 
   // get user profile
   app.get("/profile", (req, res) => {
-    console.log("*************tryning to get profile***************** : {}",req.headers.authorization);
     try {
       const bearer = req.headers.authorization.replace("Bearer ", "");
       const { verified, payload } = verifyToken(bearer);
